@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>ReplyPilot Popup</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      min-width: 300px;
+      min-height: 200px;
+      padding: 16px;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+    }
+
+    .api-key-section,
+    .test-section,
+    .instructions {
+      margin-bottom: 16px;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+
+    button {
+      background: #0073b1;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+
+    button:hover {
+      background: #005983;
+    }
+
+    #popup-status,
+    #key-status {
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .instructions ol {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+
+<body>
+  <h2>ReplyPilot</h2>
+
+  <div class="api-key-section">
+    <label for="api-key">Groq API Key:</label>
+    <input type="password" id="api-key" placeholder="gsk_..." />
+    <button id="save-key">Save Key</button>
+    <div id="key-status"></div>
+  </div>
+
+  <div class="test-section">
+    <button id="popup-action">Test Extension</button>
+    <div id="popup-status">No text selected yet.</div>
+  </div>
+
+  <div class="instructions">
+    <h3>How to use:</h3>
+    <ol>
+      <li>Go to LinkedIn.com</li>
+      <li>Select text in a comment</li>
+      <li>Click the ReplyPilot button</li>
+      <li>Choose your tone and generate reply</li>
+    </ol>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
