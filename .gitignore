@@ -1,0 +1,11 @@
+# Config file with sensitive API keys
+config.js
+
+# Environment files
+.env
+.env.local
+
+# System files
+.DS_Store
+Thumbs.db
+*.lnk

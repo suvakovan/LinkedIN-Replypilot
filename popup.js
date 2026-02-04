@@ -1,6 +1,7 @@
 // Load saved API key on popup open
 document.addEventListener('DOMContentLoaded', () => {
-  const defaultApiKey = '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';
+  // Get default API key from config (loaded via popup.html)
+  const defaultApiKey = window.CONFIG?.GROQ_API_KEY || '';
 
   chrome.storage.sync.get(['groqApiKey'], (result) => {
     const apiKeyInput = document.getElementById('api-key');
