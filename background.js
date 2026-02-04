@@ -1,14 +1,22 @@
+// Import config - API key is hardcoded as fallback for service worker
+const CONFIG = {
+  GROQ_API_KEY: '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',
+  MODEL: 'llama-3.3-70b-versatile',
+  MAX_TOKENS: 150,
+  TEMPERATURE: 0.7
+};
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "fetch-openai-reply") {
     console.log("Background script received message:", message);
 
-    // Get API key from storage
+    // Get API key from storage, fallback to config
     chrome.storage.sync.get(['groqApiKey'], (result) => {
       console.log("Background script storage result:", result);
-      const apiKey = result.groqApiKey;
+      const apiKey = result.groqApiKey || CONFIG.GROQ_API_KEY;
 
       if (!apiKey) {
-        console.log("No API key found in storage");
+        console.log("No API key found");
         sendResponse({
           reply: "Please set your Groq API key in the extension popup first.",
           error: "NO_API_KEY"
@@ -25,10 +33,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           Authorization: `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
+          model: CONFIG.MODEL,
           messages: [{ role: "user", content: message.prompt }],
-          max_tokens: 150,
-          temperature: 0.7
+          max_tokens: CONFIG.MAX_TOKENS,
+          temperature: CONFIG.TEMPERATURE
         })
       })
         .then((res) => {
