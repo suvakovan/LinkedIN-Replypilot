@@ -24,10 +24,10 @@ function injectReplyPilotButton() {
     cursor: "pointer",
     boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
   });
-  
+
   document.body.appendChild(btn);
   console.log("ReplyPilot button injected successfully");
-  
+
   // Add click handler after button is created
   setTimeout(addButtonClickHandler, 100);
 }
@@ -76,6 +76,14 @@ function showReplyWidget(text) {
       <button class="rp-tone" data-tone="Thanks">🙏<br>Thanks</button>
       <button class="rp-tone" data-tone="Plug">🚀<br>Plug Product</button>
     </div>
+    <div class="rp-short-toggle">
+      <label class="rp-toggle-label">
+        <span>📝 Short Content</span>
+        <input type="checkbox" id="shortContentToggle" class="rp-toggle-input">
+        <span class="rp-toggle-slider"></span>
+      </label>
+      <span class="rp-toggle-hint">Generate brief 1-2 sentence reply</span>
+    </div>
     <button id="genReply" class="rp-generate">Generate Reply</button>
     <div id="aiReplyOutput" class="rp-output"></div>
   `;
@@ -95,7 +103,8 @@ function showReplyWidget(text) {
   document.querySelector('.rp-tone[data-tone="Friendly"]').classList.add('rp-active');
 
   document.getElementById("genReply").onclick = () => {
-    fetchReplyAndInsert(text, selectedTone);
+    const shortContent = document.getElementById("shortContentToggle").checked;
+    fetchReplyAndInsert(text, selectedTone, shortContent);
   };
 }
 
@@ -114,41 +123,56 @@ function applyReplyPilotStyles() {
 .rp-tone.rp-active { border-color: #0a66c2; background: #0a66c2; }
 .rp-generate { width: 100%; background: #0a66c2; border: none; padding: 10px; font-weight: 600; border-radius: 8px; color: white; font-size: 14px; cursor: pointer; }
 .rp-output { margin-top: 14px; font-size: 13px; font-style: italic; color: #ccc; }
+.rp-short-toggle { margin: 12px 0; padding: 10px; background: #2b2f35; border-radius: 8px; }
+.rp-toggle-label { display: flex; align-items: center; justify-content: space-between; cursor: pointer; position: relative; }
+.rp-toggle-label span:first-child { font-size: 13px; color: #fff; }
+.rp-toggle-input { opacity: 0; width: 0; height: 0; position: absolute; }
+.rp-toggle-slider { width: 44px; height: 22px; background: #444; border-radius: 11px; position: relative; transition: background 0.3s; }
+.rp-toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 2px; left: 2px; transition: transform 0.3s; }
+.rp-toggle-input:checked + .rp-toggle-slider { background: #0a66c2; }
+.rp-toggle-input:checked + .rp-toggle-slider::before { transform: translateX(22px); }
+.rp-toggle-hint { display: block; font-size: 11px; color: #888; margin-top: 6px; }
 @media (max-width: 500px) { .replypilot-widget { width: 98vw; right: 1vw; left: 1vw; bottom: 10px; padding: 10px; } }
 `;
   document.head.appendChild(style);
 }
 
-function fetchReplyAndInsert(text, tone) {
-  const prompt = `You are a professional LinkedIn assistant. Reply to this comment: "${text}" in a ${tone.toLowerCase()} tone. Keep it short, kind, and helpful.`;
+function fetchReplyAndInsert(text, tone, shortContent = false) {
+  let prompt;
+  if (shortContent) {
+    prompt = `You are a professional LinkedIn assistant. Reply to this comment: "${text}" in a ${tone.toLowerCase()} tone. Keep your response very brief - maximum 1-2 short sentences only. Be concise and to the point.`;
+  } else {
+    prompt = `You are a professional LinkedIn assistant. Reply to this comment: "${text}" in a ${tone.toLowerCase()} tone. Keep it short, kind, and helpful.`;
+  }
+
   const output = document.getElementById("aiReplyOutput");
   output.innerText = "Generating…";
   console.log("Sending message to background:", prompt);
-  
+
   chrome.runtime.sendMessage(
     { type: "fetch-openai-reply", prompt: prompt },
     function (response) {
       console.log("Received response from background:", response);
-      
+
       if (chrome.runtime.lastError) {
         console.error("Chrome runtime error:", chrome.runtime.lastError);
         output.innerText = "Error: " + chrome.runtime.lastError.message;
         return;
       }
-      
+
       if (response && response.error) {
         output.innerText = response.reply || "Error generating reply.";
         return;
       }
-      
+
       const reply = response?.reply || "No response generated.";
       output.innerText = reply;
-      
+
       // Try to auto-insert into LinkedIn comment box
-      const commentBox = document.querySelector('[aria-label="Add a comment"]') || 
-                        document.querySelector('[data-placeholder="Add a comment"]') ||
-                        document.querySelector('div[contenteditable="true"]');
-      
+      const commentBox = document.querySelector('[aria-label="Add a comment"]') ||
+        document.querySelector('[data-placeholder="Add a comment"]') ||
+        document.querySelector('div[contenteditable="true"]');
+
       if (commentBox) {
         commentBox.focus();
         commentBox.innerText = reply;
