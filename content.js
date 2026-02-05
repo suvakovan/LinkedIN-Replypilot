@@ -44,11 +44,34 @@ function addButtonClickHandler() {
   const btn = document.querySelector('.replypilot-btn');
   if (btn) {
     btn.addEventListener("click", () => {
-      const selectedText = window.getSelection().toString().trim();
+      // First try to get selected text
+      let selectedText = window.getSelection().toString().trim();
+
+      // If no text selected, try to find the last focused/hovered comment
       if (!selectedText) {
-        alert("Please select a comment first.");
+        // Try to find comment text from LinkedIn's comment elements
+        const commentElements = document.querySelectorAll('.comments-comment-item__main-content, .feed-shared-update-v2__description, .update-components-text, .comments-comment-texteditor');
+
+        if (commentElements.length > 0) {
+          // Get the most recent/visible comment
+          const lastComment = commentElements[commentElements.length - 1];
+          selectedText = lastComment.innerText?.trim();
+        }
+      }
+
+      // If still no text, try to get the main post content
+      if (!selectedText) {
+        const postContent = document.querySelector('.feed-shared-update-v2__description-wrapper, .feed-shared-text');
+        if (postContent) {
+          selectedText = postContent.innerText?.trim();
+        }
+      }
+
+      if (!selectedText) {
+        alert("Please select or highlight a comment/post text first, then click ReplyPilot.");
         return;
       }
+
       showReplyWidget(selectedText);
     });
   }
