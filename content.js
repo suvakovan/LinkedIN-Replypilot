@@ -47,23 +47,48 @@ function addButtonClickHandler() {
       // First try to get selected text
       let selectedText = window.getSelection().toString().trim();
 
-      // If no text selected, try to find the last focused/hovered comment
+      // If no text selected, try to find the visible comment/post
       if (!selectedText) {
-        // Try to find comment text from LinkedIn's comment elements
-        const commentElements = document.querySelectorAll('.comments-comment-item__main-content, .feed-shared-update-v2__description, .update-components-text, .comments-comment-texteditor');
+        // Expanded list of selectors for LinkedIn content
+        const selectors = [
+          '.comments-comment-item__main-content',
+          '.feed-shared-update-v2__description',
+          '.update-components-text',
+          '.comments-comment-texteditor',
+          '.feed-shared-text',
+          '.feed-shared-inline-show-more-text',
+          'article .break-words'
+        ];
 
-        if (commentElements.length > 0) {
-          // Get the most recent/visible comment
-          const lastComment = commentElements[commentElements.length - 1];
-          selectedText = lastComment.innerText?.trim();
-        }
-      }
+        const elements = document.querySelectorAll(selectors.join(', '));
 
-      // If still no text, try to get the main post content
-      if (!selectedText) {
-        const postContent = document.querySelector('.feed-shared-update-v2__description-wrapper, .feed-shared-text');
-        if (postContent) {
-          selectedText = postContent.innerText?.trim();
+        // Find the element most visible in the viewport
+        let bestElement = null;
+        let maxVisibleHeight = 0;
+
+        const windowHeight = window.innerHeight;
+
+        elements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+
+          // Check if element is roughly in the viewport
+          if (rect.bottom > 0 && rect.top < windowHeight) {
+            // Calculate visible height
+            const visibleTop = Math.max(0, rect.top);
+            const visibleBottom = Math.min(windowHeight, rect.bottom);
+            const visibleHeight = visibleBottom - visibleTop;
+
+            // Prefer elements that are more central or fully visible
+            if (visibleHeight > maxVisibleHeight) {
+              maxVisibleHeight = visibleHeight;
+              bestElement = el;
+            }
+          }
+        });
+
+        if (bestElement) {
+          selectedText = bestElement.innerText?.trim();
+          console.log("ReplyPilot: Auto-detected visible text:", selectedText.substring(0, 50) + "...");
         }
       }
 
