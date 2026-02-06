@@ -46,13 +46,30 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           return res.json();
         })
         .then((data) => {
+          if (data.error) {
+            throw new Error(data.error.message || "Unknown API Error");
+          }
+
           const reply = data.choices?.[0]?.message?.content?.trim();
-          sendResponse({ reply: reply || "No response generated." });
+
+          if (!reply) {
+            throw new Error("Empty response from AI");
+          }
+
+          sendResponse({ reply: reply });
         })
         .catch((err) => {
           console.error("API error:", err);
+
+          let userMessage = "Error generating reply.";
+          if (err.message.includes("401") || err.message.includes("invalid api key")) {
+            userMessage = "Invalid API Key. Please check your Groq API key in the extension settings.";
+          } else if (err.message.includes("Empty response")) {
+            userMessage = "The AI returned an empty response. Please try again.";
+          }
+
           sendResponse({
-            reply: `Error generating reply: ${err.message}`,
+            reply: userMessage,
             error: err.message
           });
         });

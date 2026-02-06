@@ -93,7 +93,7 @@ function addButtonClickHandler() {
       }
 
       if (!selectedText) {
-        alert("Please select or highlight a comment/post text first, then click ReplyPilot.");
+        alert("ReplyPilot couldn't auto-detect a comment. Please highlight the text you want to reply to, then click ReplyPilot again.");
         return;
       }
 
@@ -248,4 +248,5 @@ function fetchReply(text, tone) {
     }
   );
 }
-// 🛑 IMPORTANT: Replace 'YOUR_OPENAI_API_KEY' above with your real OpenAI key from https://platform.openai.com/account/api-keys 
+
+// End of content.js 
